@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #343a40; 
+            color: #fff; 
+        }
+        footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #212529; 
+            padding: 20px 0;
+            text-align: center;
+            color: #fff;
+        }
+        .container {
+            padding-top: 70px; 
+        }
+        .form-control,
+        .btn {
+            background-color: #495057; 
+            border-color: #495057; 
+            color: #fff; 
+        }
+        .form-control:focus,
+        .btn:focus {
+            background-color: #343a40; 
+            border-color: #343a40; 
+            color: #fff; 
+        }
+        h1, .navbar-brand {
+            color: #fff !important; 
+        }
+        .list-group-item {
+            background-color: #495057;
+            color: #fff; 
+        }
+        #chat-log {
+            background-color: #495057; 
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <h1>Welcome to {{ room_name }} Room</h1>
+            <a href="{% url 'app:index' %}" class="ml-auto btn btn-primary">All Rooms</a> 
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <textarea id="chat-log" class="form-control" rows="10" readonly></textarea>
+        <br>
+        <div class="input-group">
+            <input type="text" id="chat-message-input" class="form-control" placeholder="Type your message">
+            <div class="input-group-append">
+                <button id="chat-message-submit" class="btn btn-primary">Send!</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <a href="{% url 'app:logout_coder' %}" class="btn btn-primary">Logout</a> 
+    </footer>
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        var groupName = "{{room_name}}"
+
+        //var ws = new WebSocket('ws://'+ window.location.host+ '/ws/wsc/'+ groupName+ '/')
+        var ws = new WebSocket('ws://'+ window.location.host+ '/ws/awsc/'+ groupName+ '/')
+        console.log( window.location.host)
+        ws.onopen = function(){
+            console.log('Websocket connection open...')
+        }
+
+        ws.onmessage = function(event){
+            console.log('Message recived from server...', event.data)
+
+            document.getElementById('chat-log').value += (event.data + '\n')
+        }
+
+        ws.onerror = function(event){
+            console.log('Websocket Error ...', event)
+        }
+
+        ws.onclose = function(event){
+           console.log('Websocket Connection Closed ...', event)
+        }
+
+        document.getElementById('chat-message-submit').onclick = function (event){
+            const messageInputDom = document.getElementById('chat-message-input')
+
+            const message = messageInputDom.value
+
+            ws.send(message)
+
+            messageInputDom.value = ''
+        }
+    </script>
+</body>
+</html>
